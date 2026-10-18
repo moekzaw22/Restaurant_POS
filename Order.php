@@ -122,32 +122,25 @@ if ($order_id) {
     }
 }
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Order - Table <?= htmlspecialchars($table_id) ?></title>
 <script>
-function toggleExtra(){
-    var panel = document.getElementById("extraPanel");
-    panel.style.display = (panel.style.display === "none") ? "block" : "none";
-}
+function openExtraModal(){document.getElementById('extraModal').style.display='block';}
+function closeExtraModal(){document.getElementById('extraModal').style.display='none';}
+function updateExtraCount(){var count=document.querySelectorAll('#extraModal input[name="extra[]"]:checked').length;document.getElementById('extraSelectionLabel').textContent=count ? count+' selected' : 'Optional add-ons';}
+window.addEventListener('click',function(event){if(event.target===document.getElementById('extraModal'))closeExtraModal();});
+window.addEventListener('keydown',function(event){if(event.key==='Escape')closeExtraModal();});
 </script>
-</head>
-<body>
-<h2>Table <?= htmlspecialchars($table_id) ?></h2>
-<?php if (!empty($msg)) echo "<p><strong>$msg</strong></p>"; ?>
+<div class="page-heading"><div><p class="eyebrow">Table service</p><div class="title-row"><h1>Table <?= htmlspecialchars($table_id) ?></h1><?php if ($order_id): ?><span class="badge badge-orange">❗️Already Occupied (Order #<?= (int)$order_id ?>)</span><?php endif; ?></div></div><a class="button" href="Tables.php">← All tables</a></div>
+<?php if (!empty($msg)) echo '<div class="panel">'.htmlspecialchars($msg).'</div>'; ?>
 
-<form method="POST">
+<?php if (!$order_id): ?>
+<form method="POST" class="panel">
     <input type="hidden" name="table_id" value="<?= htmlspecialchars($table_id) ?>">
-    <button type="submit" name="occupytable" <?= $order_id ? 'disabled' : '' ?>>
-        <?= $order_id ? "❗️Already Occupied (Order #$order_id)" : "Occupy Table" ?>
-    </button>
+    <button class="primary" type="submit" name="occupytable">Occupy Table</button>
 </form>
-<hr>
-
+<?php endif; ?>
 <?php if ($order_id): ?>
-<form method="POST">
+<div class="order-layout"><form method="POST" class="panel order-form">
+    <div><p class="eyebrow">Add to order</p><h2>New item</h2></div>
     <input type="hidden" name="table_id" value="<?= htmlspecialchars($table_id) ?>">
     <label>Product Code:</label>
     <input type="text" name="product_code" required autocomplete="off">
@@ -155,23 +148,32 @@ function toggleExtra(){
     <input type="number" name="quantity" value="1" min="1">
     <label>Note:</label>
     <input type="text" name="note">
-    <button type="button" onclick="toggleExtra()">+ Add Extra</button>
-    <div id="extraPanel" style="display:none; margin-top:10px; border:1px solid #ccc; padding:10px;">
-        <h4>Extras</h4>
+    <button type="button" onclick="openExtraModal()">＋ Choose extras <span id="extraSelectionLabel" class="muted">Optional add-ons</span></button>
+    <div id="extraModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="extraModalTitle">
+      <div class="modal-content extra-modal-content">
+        <button class="close" type="button" onclick="closeExtraModal()" aria-label="Close">×</button>
+        <p class="eyebrow">Customize this item</p><h2 id="extraModalTitle">Choose extras</h2>
+        <p class="page-subtitle">Select any add-ons to include with this order item.</p>
+        <div class="extra-options">
         <?php
         $extra_q = mysqli_query($connection, "SELECT Product_Code, Product_Name, Item_Price FROM product WHERE Food_Type='Extra' ORDER BY Product_Name");
+        $extra_count = 0;
         while($ex = mysqli_fetch_assoc($extra_q)) {
-            echo '<label><input type="checkbox" name="extra[]" value="'.htmlspecialchars($ex['Product_Code']).'">'
-                 .htmlspecialchars($ex['Product_Name']).' (+'.(int)$ex['Item_Price'].')</label><br>';
+            $extra_count++;
+            echo '<label class="extra-option"><input type="checkbox" name="extra[]" value="'.htmlspecialchars($ex['Product_Code'], ENT_QUOTES, 'UTF-8').'" onchange="updateExtraCount()">'
+                 .'<span>'.htmlspecialchars($ex['Product_Name']).'</span><strong>+'.number_format((float)$ex['Item_Price'], 2).'</strong></label>';
         }
         ?>
+        <?php if ($extra_count === 0): ?><p class="empty-state">No products are in the Extra category yet.</p><?php endif; ?>
+        </div>
+        <div class="modal-actions"><button type="button" onclick="closeExtraModal()">Close</button><button class="primary" type="button" onclick="closeExtraModal()">Done</button></div>
+      </div>
     </div>
-    <br>
-    <button type="submit" name="addproduct">Add</button>
+    <button class="primary" type="submit" name="addproduct">Add item</button>
 </form>
 
-<h3>Order #<?= $order_id ?> Items</h3>
-<table width="100%" border="1" cellpadding="6" cellspacing="0">
+<section class="panel"><div class="section-heading" style="margin-top:0"><div><p class="eyebrow">Active order</p><h2>Order #<?= (int)$order_id ?></h2></div><span class="badge badge-orange">In progress</span></div>
+<div class="table-wrap"><table>
 <tr>
 <th>Product</th>
 <th>Qty</th>
@@ -185,34 +187,34 @@ function toggleExtra(){
 <td><?= htmlspecialchars($it['Product_Name']) ?></td>
 <td><?= (int)$it['Quantity'] ?></td>
 <td><?= htmlspecialchars($it['Note']) ?></td>
-<td><?= (int)$it['Product_Price'] ?></td>
-<td><?= (int)$it['Line_Total'] ?></td>
+<td><?= number_format((float)$it['Product_Price'], 2) ?></td>
+<td><?= number_format((float)$it['Line_Total'], 2) ?></td>
 <td>
 <form method="POST" style="display:inline;">
 <input type="hidden" name="table_id" value="<?= $table_id ?>">
 <input type="hidden" name="order_detail_id" value="<?= $it['Order_Detail_ID'] ?>">
-<button type="submit" name="cancel_item">Cancel</button>
+<button class="button-small button-danger" type="submit" name="cancel_item">Remove</button>
 </form>
 </td>
 </tr>
 <?php endforeach; ?>
 <tr>
-<td colspan="4" align="right"><strong>Grand Total:</strong></td>
-<td><strong><?= (int)$grand_total ?></strong></td>
+<td colspan="4" style="text-align:right"><strong>Grand total</strong></td>
+<td><strong><?= number_format((float)$grand_total, 2) ?></strong></td>
 <td></td>
 </tr>
-</table>
+</table></div>
 
 <form action="check_out_function.php" method="POST">
     <input type="hidden" name="table_id" value="<?= htmlspecialchars($table_id) ?>">
     <input type="hidden" name="order_id" value="<?= $order_id ?>">
-    <button type="submit" name="btncheckout" <?= empty($items) ? 'disabled' : '' ?>>Check Out #<?= $order_id ?></button>
+    <button class="primary" type="submit" name="btncheckout" <?= empty($items) ? 'disabled' : '' ?>>Check out · <?= number_format((float)$grand_total, 2) ?></button>
 </form>
+</section></div>
 
 <?php else: ?>
 <p>No open order yet for this table.</p>
 <?php endif; ?>
 
 <p><a href="index.php">← Back to tables</a></p>
-</body>
-</html>
+</main></body></html>

@@ -39,13 +39,10 @@ while ($row = mysqli_fetch_assoc($q)) {
 }
 ?>
 
-<h3>Order #<?= $order_id ?> Details <br>(Table <?= htmlspecialchars($order_info['Table_ID']) ?>)
-    Open: <?= htmlspecialchars($order_info['Order_Open']) ?> 
-    Close: <?= htmlspecialchars($order_info['Order_Close'] ?? '-') ?> 
-    Status: <?= htmlspecialchars($order_info['Order_Status']) ?>
-</h3>
+<p class="eyebrow">Order details</p><h2>Order #<?= $order_id ?> · Table <?= htmlspecialchars($order_info['Table_ID'] ?? '—') ?></h2>
+<p class="page-subtitle">Opened <?= htmlspecialchars($order_info['Order_Open'] ?? '—') ?> · Closed <?= htmlspecialchars($order_info['Order_Close'] ?? '—') ?> · <?= htmlspecialchars($order_info['Order_Status'] ?? '—') ?></p>
 
-<table width="100%" border="1" cellpadding="6" cellspacing="0">
+<div class="table-wrap" style="margin-top:18px"><table>
 <tr>
 <th>Product</th>
 <th>Qty</th>
@@ -58,12 +55,12 @@ while ($row = mysqli_fetch_assoc($q)) {
 <td><?= htmlspecialchars($it['Product_Name']) ?></td>
 <td><?= (int)$it['Quantity'] ?></td>
 <td><?= htmlspecialchars($it['Note']) ?></td>
-<td><?= (int)$it['Product_Price'] ?></td>
-<td><?= (int)$it['Line_Total'] ?></td>
+<td><?= number_format((float)$it['Product_Price'], 2) ?></td>
+<td><?= number_format((float)$it['Line_Total'], 2) ?></td>
 </tr>
 <?php endforeach; ?>
 <tr>
 <td colspan="4" align="right"><strong>Grand Total:</strong></td>
-<td><strong><?= (int)$grand_total ?></strong></td>
+<td><strong><?= number_format((float)$grand_total, 2) ?></strong></td>
 </tr>
-</table>
+</table></div>

@@ -1,70 +1,25 @@
-<style>
-body{
-    margin:0;
-    font-family: Arial;
+<?php
+function is_active($page) {
+    return strcasecmp(basename($_SERVER['PHP_SELF']), $page) === 0 ? 'current' : '';
 }
-
-.topbar{
-    background:#333;
-    color:white;
-    padding:12px;
-    font-size:20px;
-}
-
-.nav-menu{
-    background:#444;
-}
-
-.nav-menu .nav-link{
-    color:white;
-    padding:14px 18px;
-    display:inline-block;
-    text-decoration:none;
-}
-
-.nav-menu .nav-link:hover{
-    background:#666;
-}
-
-.nav-link.current{
-    background:#666;
-}
-
-.content{
-    padding:15px;
-}
-</style>
-<?php 
-function is_active($page){
-    return basename($_SERVER['PHP_SELF']) == $page ? 'current' : '';
-}
- ?>
+?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
+    <title>Restaurant POS</title>
+    <link rel="stylesheet" href="app.css">
 </head>
 <body>
-
-
-
-<div class="topbar">
-Restaurant POS
-</div>
-
-<div class="nav-menu">
-    <a class="nav-link <?= is_active('index.php'); ?>" href="index.php">Dashboard</a>
-    <a class="nav-link <?= is_active('product_list.php'); ?>" href="product_list.php">Products</a>
-    <a class="nav-link <?= is_active('tables.php'); ?>" href="tables.php">Tables</a>
-    <a class="nav-link <?= is_active('Reports.php'); ?>" href="Reports.php">Reports</a>
-</div>
-</body>
-</html>
-<script>
-// function toggleMenu(){
-//     document.getElementById("navMenu").classList.toggle("active");
-// }
-
-</script>
+<header class="app-header">
+    <a class="brand" href="index.php"><span class="brand-mark">R</span><span>Restaurant<span class="brand-light">POS</span></span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+        <a class="nav-link <?= is_active('index.php') ?>" href="index.php">Overview</a>
+        <a class="nav-link <?= is_active('Product_list.php') ?>" href="Product_list.php">Products</a>
+        <a class="nav-link <?= is_active('Tables.php') ?>" href="Tables.php">Tables</a>
+        <a class="nav-link <?= in_array(basename($_SERVER['PHP_SELF']), ['Reports.php','Today_Reports.php','Report_By_Date.php'], true) ? 'current' : '' ?>" href="Reports.php">Reports</a>
+    </nav>
+    <span class="header-status"><i></i> Service ready</span>
+</header>
+<main class="page-content">

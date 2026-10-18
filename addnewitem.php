@@ -10,7 +10,7 @@ $product_code = $_POST['product_code'] ?? '';
 $quantity = $_POST['quantity'] ?? 1;
 $note = $_POST['note'] ?? '';
 
-// Validate
+// Validatea
 if(!$table_id || !$product_code){
     echo json_encode(['error'=>'Table or product missing']);
     exit;

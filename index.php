@@ -16,67 +16,51 @@ while ($t = mysqli_fetch_assoc($tq)) {
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>POS Dashboard</title>
-    <style>
-        table { border-collapse: collapse; margin-bottom: 20px; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #eee; }
-        .occupied { background-color: #fdd; }
-        .available { background-color: #dfd; }
-    </style>
-</head>
-<body>
-<h1>Dashboard</h1>
-
-<h2>Tables</h2>
-<table>
+<div class="page-heading"><div><p class="eyebrow">Restaurant operations</p><p class="page-subtitle">A live snapshot of your dining room and menu.</p></div><a class="button button-primary" href="Tables.php">Manage tables</a></div>
+<?php $occupied_count = 0; foreach ($tables as $table) { if ($table['Status'] === 'Occupied') $occupied_count++; } ?>
+<div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Dining tables</div><div class="stat-value"><?= count($tables) ?></div><div class="stat-note">Across your restaurant</div></div>
+    <div class="stat-card"><div class="stat-label">Currently occupied</div><div class="stat-value"><?= $occupied_count ?></div><div class="stat-note">Active table sessions</div></div>
+    <div class="stat-card"><div class="stat-label">Menu items</div><div class="stat-value"><?= count($products) ?></div><div class="stat-note">Products available to serve</div></div>
+</div>
+<div class="section-heading"><h2>Table overview</h2><a href="Tables.php">See all tables →</a></div>
+<div class="table-wrap"><table>
+<thead>
     <tr>
         <th>Table ID</th>
         <th>Status</th>
         <th>Order ID</th>
         <th>Action</th>
-    </tr>
+    </tr></thead><tbody>
     <?php foreach ($tables as $t): ?>
-    <tr class="<?= $t['Status']=='Occupied' ? 'occupied':'available' ?>">
-        <td><?= $t['Table_ID'] ?></td>
-        <td><?= $t['Status'] ?></td>
+    <tr>
+        <td><strong>Table <?= (int)$t['Table_ID'] ?></strong></td>
+        <td><span class="status-pill <?= $t['Status']=='Occupied' ? 'status-occupied':'status-available' ?>"><i class="status-dot"></i><?= htmlspecialchars($t['Status']) ?></span></td>
         <td><?= $t['Assign_order'] ?? '-' ?></td>
         <td>
-            <a href="order.php?table_id=<?= $t['Table_ID'] ?>">Open Order</a>
+            <a class="button button-small" href="Order.php?table_id=<?= (int)$t['Table_ID'] ?>">Open table</a>
         </td>
     </tr>
     <?php endforeach; ?>
-</table>
+</tbody></table></div>
 
-<h2>Products</h2>
-<table>
-    <tr>
+<div class="section-heading"><h2>Menu preview</h2><a href="Product_list.php">Manage products →</a></div>
+<div class="table-wrap"><table>
+    <thead><tr>
         <th>Product Name</th>
         <th>Code</th>
         <th>Price</th>
         <th>Food Type</th>
         <th>Action</th>
-    </tr>
+    </tr></thead><tbody>
     <?php foreach ($products as $p): ?>
     <tr>
         <td><?= htmlspecialchars($p['Product_Name']) ?></td>
         <td><?= htmlspecialchars($p['Product_Code']) ?></td>
-        <td><?= (int)$p['Item_Price'] ?></td>
+        <td><?= number_format((float)$p['Item_Price'], 2) ?></td>
         <td><?= htmlspecialchars($p['Food_Type']) ?></td>
-        <td>
-            <a href="product_add.php?edit=<?= $p['Product_ID'] ?>">Edit</a>
-            |
-            <a href="product_list.php?delete=<?= $p['Product_ID'] ?>" onclick="return confirm('Delete this product?')">Delete</a>
-        </td>
+        <td><a href="Product_list.php">View in products</a></td>
     </tr>
     <?php endforeach; ?>
-</table>
-
-<p><a href="product_add.php">Add New Product</a></p>
-
-</body>
-</html>
+</tbody></table></div>
+</main></body></html>
